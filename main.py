@@ -1,7 +1,9 @@
 #  GUI libraries
-from tkinter import messagebox
 from tkinter import *
+from tkinter import ttk
 from tkinter.ttk import *
+from tkinter import messagebox
+from tkinter.filedialog import asksaveasfile
 
 #  url sifting
 import urllib.request
@@ -23,7 +25,6 @@ import json
 import base64
 
 class App(Frame):
-
     def __init__(self, parent):
         Frame.__init__(self, parent)
 
@@ -66,7 +67,6 @@ class App(Frame):
         self.queue = queue.Queue()
         filename = self.tv.item(item,"text")
         link = self.linkarr[self.namearr.index(filename)]
-        print(link)
         Downloader(self.queue, link, filename).start()
 
 class Downloader(threading.Thread):
@@ -75,7 +75,11 @@ class Downloader(threading.Thread):
         self.queue = queue
         self.link = link
         self.filename = filename
-        
+    
+    def openFile(self):
+        return asksaveasfile(mode='w', defaultextension=".pdf", initialfile=self.filename).name
+    
+    '''
     def backup(self):
         #  connects to google drive
         SCOPES = 'https://www.googleapis.com/auth/drive'
@@ -99,6 +103,7 @@ class Downloader(threading.Thread):
                 self.queue.put("Task finished")
 
         messagebox.showwarning('Finished', 'Finished downloading ' + self.link)
+    '''
         
     def run(self):
         messagebox.showwarning("Confirm", self.link + " will start downloading")
@@ -108,11 +113,13 @@ class Downloader(threading.Thread):
         opener.addheaders = [('User-agent', 'Mozilla/5.0 (Linux; Android 6.0.1; SM-G532G Build/MMB29T) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.83 Mobile Safari/537.36')]
         urllib.request.install_opener(opener)
         
-        urllib.request.urlretrieve(self.link, self.filename)
+        filename = self.openFile()
+        
+        urllib.request.urlretrieve(self.link, filename)
 
-        messagebox.showwarning("Finished", self.link + " has been downloaded\nPress okay to upload")
+        messagebox.showwarning("Finished", self.link + "\nhas been downloaded")
 
-        self.backup()
+        #self.backup()
         
 def main():
     makeJSON()
